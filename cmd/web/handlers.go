@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/OnkelPony/snippetbox/internal/models"
-	"html/template"
 	"net/http"
 	"strconv"
 )
@@ -15,23 +14,31 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	files := []string{
-		"./ui/html/base.gohtml",
-		"./ui/html/partials/nav.gohtml",
-		"./ui/html/pages/home.gohtml",
+	snippets, err := app.snippets.Latest()
+	if err != nil {
+		app.serverError(w, err)
 	}
 
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		app.serverError(w, err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+	for _, snippet := range snippets {
+		fmt.Fprintf(w, "%+v\n", snippet)
 	}
-	err = ts.ExecuteTemplate(w, "base", nil)
-	if err != nil {
-		app.serverError(w, err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-	}
+	// files := []string{
+	// 	"./ui/html/base.gohtml",
+	// 	"./ui/html/partials/nav.gohtml",
+	// 	"./ui/html/pages/home.gohtml",
+	// }
+	//
+	// ts, err := template.ParseFiles(files...)
+	// if err != nil {
+	// 	app.serverError(w, err)
+	// 	http.Error(w, "Internal server error", http.StatusInternalServerError)
+	// 	return
+	// }
+	// err = ts.ExecuteTemplate(w, "base", nil)
+	// if err != nil {
+	// 	app.serverError(w, err)
+	// 	http.Error(w, "Internal server error", http.StatusInternalServerError)
+	// }
 }
 
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
