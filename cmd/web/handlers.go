@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/OnkelPony/snippetbox/internal/models"
+	"html/template"
 	"net/http"
 	"strconv"
 )
@@ -57,6 +58,28 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+
+	files := []string{
+		"./ui/html/base.gohtml",
+		"./ui/html/partials/nav.gohtml",
+		"./ui/html/pages/view.gohtml",
+	}
+
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	data := &templateData{
+		Snippet: snippet,
+	}
+
+	err = ts.ExecuteTemplate(w, "base", data)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
 	fmt.Fprintf(w, "%+v", snippet)
 }
 
