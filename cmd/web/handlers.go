@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"github.com/OnkelPony/snippetbox/internal/models"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -18,26 +20,29 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, err)
 	}
 
-	for _, snippet := range snippets {
-		fmt.Fprintf(w, "%+v\n", snippet)
+	//for _, snippet := range snippets {
+	//	fmt.Fprintf(w, "%+v\n", snippet)
+	//}
+
+	files := []string{
+		"./ui/html/base.gohtml",
+		"./ui/html/partials/nav.gohtml",
+		"./ui/html/pages/home.gohtml",
 	}
-	// files := []string{
-	// 	"./ui/html/base.gohtml",
-	// 	"./ui/html/partials/nav.gohtml",
-	// 	"./ui/html/pages/home.gohtml",
-	// }
-	//
-	// ts, err := template.ParseFiles(files...)
-	// if err != nil {
-	// 	app.serverError(w, err)
-	// 	http.Error(w, "Internal server error", http.StatusInternalServerError)
-	// 	return
-	// }
-	// err = ts.ExecuteTemplate(w, "base", nil)
-	// if err != nil {
-	// 	app.serverError(w, err)
-	// 	http.Error(w, "Internal server error", http.StatusInternalServerError)
-	// }
+
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	data := templateData{
+		Snippets: snippets,
+	}
+	err = ts.ExecuteTemplate(w, "base", data)
+	if err != nil {
+		app.serverError(w, err)
+	}
 }
 
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
@@ -47,9 +52,13 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	snippets, err := app.snippets.Latest()
+	snippet, err := app.snippets.Get(id)
 	if err != nil {
-		app.serverError(w, err)
+		if errors.Is(err, models.ErrNoRecord) {
+			app.notFound(w)
+		} else {
+			app.serverError(w, err)
+		}
 		return
 	}
 
@@ -66,13 +75,15 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := &templateData{
-		Snippets: snippets,
+		Snippet: snippet,
 	}
 
 	err = ts.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		app.serverError(w, err)
 	}
+
+	fmt.Fprintf(w, "%+v", snippet)
 }
 
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
