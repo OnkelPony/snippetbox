@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"flag"
 	"github.com/OnkelPony/snippetbox/internal/models"
@@ -56,13 +57,24 @@ func main() {
 		formDecoder:    formDecoder,
 		sessionManager: sessionManager,
 	}
-
-	srv := &http.Server{
-		Addr:     *addr,
-		ErrorLog: errorLog,
-		Handler:  app.routes(),
+	tlsConfig := &tls.Config{
+		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
+		MinVersion:       tls.VersionTLS12,
+		CipherSuites: []uint16{
+			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
+			tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+		},
 	}
-
+	srv := &http.Server{
+		Addr:      *addr,
+		ErrorLog:  errorLog,
+		Handler:   app.routes(),
+		TLSConfig: tlsConfig,
+	}
 	infoLog.Printf("Starting server on %s", *addr)
 	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 	errorLog.Fatal(err)
