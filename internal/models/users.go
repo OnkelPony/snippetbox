@@ -9,6 +9,12 @@ import (
 	"time"
 )
 
+type UserModelInterface interface {
+	Authenticate(email, password string) (int, error)
+	Insert(name, email, password string) error
+	Exists(id int) (bool, error)
+}
+
 type User struct {
 	ID             int
 	Name           string
