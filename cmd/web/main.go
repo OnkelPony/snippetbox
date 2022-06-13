@@ -25,7 +25,7 @@ type application struct {
 	templateCache  map[string]*template.Template
 	formDecoder    *form.Decoder
 	sessionManager *scs.SessionManager
-	debugMode      bool
+	debugMode      *bool
 }
 
 func main() {
@@ -60,7 +60,7 @@ func main() {
 		templateCache:  templateCache,
 		formDecoder:    formDecoder,
 		sessionManager: sessionManager,
-		debugMode:      *debug,
+		debugMode:      debug,
 	}
 	tlsConfig := &tls.Config{
 		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
