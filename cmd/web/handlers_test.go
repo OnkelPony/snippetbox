@@ -16,6 +16,13 @@ func TestPing(t *testing.T) {
 	assert.Equal(t, body, "OK")
 }
 
+func TestSnippetCreate(t *testing.T) {
+	app := newTestApplication(t)
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+}
+
 func TestSnippetView(t *testing.T) {
 	app := newTestApplication(t)
 	ts := newTestServer(t, app.routes())
