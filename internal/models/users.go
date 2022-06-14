@@ -49,6 +49,19 @@ func (m *UserModel) Authenticate(email, password string) (int, error) {
 	}
 	return id, nil
 }
+
+func (m *UserModel) Get(id int) (*User, error) {
+	var name, email string
+	var created time.Time
+	stmt := `SELECT name, email, created FROM users WHERE id = ?`
+	err := m.DB.QueryRow(stmt, id).Scan(&name, &email, &created)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNoRecord
+		}
+	}
+}
+
 func (m *UserModel) Insert(name, email, password string) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
 	if err != nil {
