@@ -47,6 +47,10 @@ func (app *application) about(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "about.gohtml", data)
 }
 
+func (app *application) accountView(w http.ResponseWriter, r *http.Request) {
+
+}
+
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 	params := httprouter.ParamsFromContext(r.Context())
 	id, err := strconv.Atoi(params.ByName("id"))
