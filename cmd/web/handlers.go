@@ -47,6 +47,14 @@ func (app *application) about(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "about.gohtml", data)
 }
 
+func (app *application) accountPasswordUpdate(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (app *application) accountPasswordUpdatePost(w http.ResponseWriter, r *http.Request) {
+
+}
+
 func (app *application) accountView(w http.ResponseWriter, r *http.Request) {
 	id := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
 	user, err := app.users.Get(id)
