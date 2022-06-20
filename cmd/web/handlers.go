@@ -61,7 +61,13 @@ func (app *application) accountPasswordUpdate(w http.ResponseWriter, r *http.Req
 }
 
 func (app *application) accountPasswordUpdatePost(w http.ResponseWriter, r *http.Request) {
-
+	var form accountPasswordUpdateForm
+	err := app.decodePostForm(r, &form)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+	form.CheckField(validator.NotBlank(form.CurrentPassword))
 }
 
 func (app *application) accountView(w http.ResponseWriter, r *http.Request) {
