@@ -67,7 +67,17 @@ func (app *application) accountPasswordUpdatePost(w http.ResponseWriter, r *http
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
-	form.CheckField(validator.NotBlank(form.CurrentPassword))
+	form.CheckField(validator.NotBlank(form.CurrentPassword), "currentPassword", "This field cannot be blank")
+	form.CheckField(validator.NotBlank(form.NewPassword), "newPassword", "This field cannot be blank")
+	form.CheckField(validator.MinChars(form.NewPassword, 8), "newPassword", "This field must be at least 8 chars long")
+	form.CheckField(validator.NotBlank(form.NewPasswordConfirmation), "newPasswordConfirmation", "This field cannot be blank")
+	form.CheckField(form.NewPasswordConfirmation == form.NewPassword, "newPasswordConfirmation", "Passwords do not match")
+	if !form.Valid() {
+		data := app.newTemplateData(r)
+		data.Form = form
+		app.render(w, http.StatusUnprocessableEntity, "password.gohtml", data)
+		return
+	}
 }
 
 func (app *application) accountView(w http.ResponseWriter, r *http.Request) {
@@ -159,7 +169,7 @@ func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 	form.CheckField(validator.NotBlank(form.Email), "email", "This field cannot be blank")
 	form.CheckField(validator.Matches(form.Email, validator.EmailRX), "email", "This field must be valid e-email address")
 	form.CheckField(validator.NotBlank(form.Password), "password", "This field cannot be blank")
-	form.CheckField(validator.MinChars(form.Password, 8), "password", "This field must be at leas 8 chars long")
+	form.CheckField(validator.MinChars(form.Password, 8), "password", "This field must be at least 8 chars long")
 	if !form.Valid() {
 		data := app.newTemplateData(r)
 		data.Form = form
