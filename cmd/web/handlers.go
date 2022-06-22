@@ -78,6 +78,21 @@ func (app *application) accountPasswordUpdatePost(w http.ResponseWriter, r *http
 		app.render(w, http.StatusUnprocessableEntity, "password.gohtml", data)
 		return
 	}
+	id := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+	err = app.users.PasswordUpdate(id, form.CurrentPassword, form.NewPassword)
+	if err != nil {
+		if errors.Is(err, models.ErrInvalidCredentials) {
+			form.AddFieldError("currentPassword", "Invalid passwordl")
+			data := app.newTemplateData(r)
+			data.Form = form
+			app.render(w, http.StatusUnprocessableEntity, "password.gohtml", data)
+		} else {
+			app.serverError(w, err)
+		}
+		return
+	}
+	app.sessionManager.Put(r.Context(), "flash", "Password successfully changed")
+	http.Redirect(w, r, "/account/view", http.StatusSeeOther)
 }
 
 func (app *application) accountView(w http.ResponseWriter, r *http.Request) {
