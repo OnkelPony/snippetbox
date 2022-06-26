@@ -158,6 +158,8 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 		app.render(w, http.StatusUnprocessableEntity, "create.gohtml", data)
 		return
 	}
+	userId := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+	fmt.Printf("user id is %d\n", userId)
 	id, err := app.snippets.Insert(form.Title, form.Content, form.Expires)
 	if err != nil {
 		app.serverError(w, err)
